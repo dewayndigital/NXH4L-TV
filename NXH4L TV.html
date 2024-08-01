@@ -1,0 +1,617 @@
+<html><head><base href="https://websim.io/3d-tv-youtube-edition-v9/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D TV YouTube Edition V9 with Matrix Background</title>
+<style>
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #000;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+  color: white;
+}
+
+#matrix-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.tv-container {
+  perspective: 1000px;
+}
+
+.tv {
+  position: relative;
+  width: 800px;
+  height: 450px;
+  transform-style: preserve-3d;
+  transform: rotateX(15deg) rotateY(-15deg);
+  transition: transform 0.5s;
+}
+
+.screen {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  transform: translateZ(20px);
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+.frame {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, #333, #555);
+  border: 25px solid #777;
+  box-sizing: border-box;
+  border-radius: 30px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+}
+
+.stand {
+  position: absolute;
+  width: 300px;
+  height: 50px;
+  background: linear-gradient(to bottom, #555, #333);
+  bottom: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 0 0 25px 25px;
+}
+
+.buttons {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  z-index: 10;
+}
+
+.button {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(45deg, #666, #888);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+.button:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.speakers {
+  position: absolute;
+  top: 50%;
+  left: -35px;
+  width: 25px;
+  height: 150px;
+  background: linear-gradient(to right, #444, #666);
+  border-radius: 15px;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.5);
+  transform: translateY(-50%);
+}
+
+.speakers:before,
+.speakers:after {
+  content: '';
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  background: radial-gradient(#222, #444);
+  border-radius: 50%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.speakers:before {
+  top: 30px;
+}
+
+.speakers:after {
+  bottom: 30px;
+}
+
+.power-indicator {
+  position: absolute;
+  right: 40px;
+  top: 30px;
+  width: 20px;
+  height: 20px;
+  background-color: #e74c3c;
+  border-radius: 50%;
+  transition: all 0.3s;
+  box-shadow: 0 0 15px #e74c3c;
+}
+
+.tv.off .power-indicator {
+  background-color: #e74c3c;
+  box-shadow: 0 0 15px #e74c3c;
+}
+
+.tv.off .screen iframe {
+  display: none;
+}
+
+.volume-indicator {
+  position: absolute;
+  left: 30px;
+  top: 30px;
+  width: 25px;
+  height: 150px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.volume-level {
+  width: 100%;
+  height: 50%;
+  background-color: #3498db;
+  position: absolute;
+  bottom: 0;
+  transition: height 0.3s;
+  box-shadow: 0 0 15px #3498db;
+}
+
+.reflection {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), transparent);
+  pointer-events: none;
+  border-radius: 20px 20px 0 0;
+  z-index: 10;
+}
+
+.remote {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20px;
+  background: linear-gradient(45deg, #333, #555);
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.remote button {
+  padding: 20px 30px;
+  font-size: 16px;
+  cursor: pointer;
+  background: linear-gradient(45deg, #666, #888);
+  color: white;
+  border: none;
+  border-radius: 15px;
+  transition: all 0.3s;
+}
+
+.remote button:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+}
+
+.remote button:active {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.static-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="100%" height="100%" fill="black"/><rect width="2" height="2" fill="white" x="0" y="0"/><rect width="2" height="2" fill="white" x="4" y="4"/></svg>');
+  background-size: 100px 100px;
+  animation: static 0.2s infinite linear;
+  opacity: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  border-radius: 20px;
+  z-index: 5;
+}
+
+@keyframes static {
+  0% { background-position: 0 0; }
+  100% { background-position: 100% 100%; }
+}
+
+.movement-toggle {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.channel-display {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 18px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.channel-list {
+  display: none;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 20px;
+  border-radius: 10px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.channel-list h3 {
+  margin-top: 0;
+}
+
+.channel-list ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.channel-list li {
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.channel-list li:hover {
+  color: #3498db;
+}
+</style>
+</head>
+<body>
+  <canvas id="matrix-bg"></canvas>
+  <div class="movement-toggle">
+    <span>TV Movement:</span>
+    <label class="toggle-switch">
+      <input type="checkbox" id="movement-toggle" checked>
+      <span class="slider"></span>
+    </label>
+  </div>
+  <div class="tv-container">
+    <div class="tv off">
+      <div class="power-indicator"></div>
+      <div class="volume-indicator">
+        <div class="volume-level"></div>
+      </div>
+      <div class="screen">
+        <iframe width="100%" height="100%" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        <div class="static-overlay"></div>
+        <div class="reflection"></div>
+      </div>
+      <div class="frame"></div>
+      <div class="stand"></div>
+      <div class="buttons">
+        <div class="button" id="power"></div>
+        <div class="button" id="volume-up"></div>
+        <div class="button" id="volume-down"></div>
+        <div class="button" id="channel-up"></div>
+        <div class="button" id="channel-down"></div>
+      </div>
+      <div class="speakers"></div>
+      <div class="channel-display"></div>
+    </div>
+  </div>
+  <div class="remote">
+    <button id="remote-power">Power</button>
+    <button id="remote-vol-up">Vol +</button>
+    <button id="remote-vol-down">Vol -</button>
+    <button id="remote-ch-up">Ch +</button>
+    <button id="remote-ch-down">Ch -</button>
+  </div>
+  <div class="channel-list">
+    <h3>Channel List</h3>
+    <ul id="channel-list"></ul>
+  </div>
+
+<script>
+// Matrix background
+const canvas = document.getElementById('matrix-bg');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const nums = '0123456789';
+
+const alphabet = katakana + latin + nums;
+
+const fontSize = 16;
+const columns = canvas.width/fontSize;
+
+const rainDrops = [];
+
+for( let x = 0; x < columns; x++ ) {
+	rainDrops[x] = 1;
+}
+
+function draw() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+	
+    ctx.fillStyle = '#0F0';
+    ctx.font = fontSize + 'px monospace';
+
+    for(let i = 0; i < rainDrops.length; i++)
+    {
+        const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+        ctx.fillText(text, i*fontSize, rainDrops[i]*fontSize);
+		
+        if(rainDrops[i]*fontSize > canvas.height && Math.random() > 0.975){
+            rainDrops[i] = 0;
+        }
+        rainDrops[i]++;
+    }
+}
+
+setInterval(draw, 30);
+
+// TV functionality
+const tv = document.querySelector('.tv');
+const screen = document.querySelector('.screen');
+const iframe = document.querySelector('iframe');
+const staticOverlay = document.querySelector('.static-overlay');
+const powerIndicator = document.querySelector('.power-indicator');
+const volumeLevel = document.querySelector('.volume-level');
+const movementToggle = document.getElementById('movement-toggle');
+const channelDisplay = document.querySelector('.channel-display');
+const channelList = document.getElementById('channel-list');
+
+const channels = [
+  { name: "TWC Ai edition", url: "https://www.youtube.com/embed/SbmLuGV36hQ?si=CR9Qg4eletPQpEZv&autoplay=1" },
+  { name: "Dopeboy money", url: "https://www.youtube.com/embed/2QMv97G8fGw?autoplay=1" },
+  { name: "NXH4L", url: "https://www.youtube.com/embed/cWgdjX3BIIA?si=eSI31ziomaKvLIaK&autoplay=1" },
+  { name: "Whispers in the night", url: "https://www.youtube.com/embed/WKOpJu0d-jo?si=WIk8Ysfezp5Yd45X&autoplay=1" },
+  { name: "Intergalactic battles", url: "https://www.youtube.com/embed/ErrJTqPts4k?si=vKCcadEaO6B5DUAj&autoplay=1" },
+  { name: "Wicked", url: "https://www.youtube.com/embed/38gvm0VaJTc?si=xJLfeo5-hRRkPfbP&autoplay=1" },
+  { name: "AMS Radio", url: "https://www.youtube.com/embed/RK6TKhUpQ8U?si=v2yCwq7jJcB5Tqhe&autoplay=1" },
+  { name: "It's Amazing", url: "https://www.youtube.com/embed/50zH5_UaWbg?si=wEb4UdnpZAfd7Hzc&autoplay=1" },
+  { name: "I'm a dog", url: "https://www.youtube.com/embed/bTsRFQ1r67E?si=_DFNb3Y6ZCBws2Di&autoplay=1" },
+  { name: "Drippy Drip", url: "https://www.youtube.com/embed/AtiRywFurt0?si=dLKoJ-geUkCztRUM&autoplay=1" },
+  { name: "My Country", url: "https://www.youtube.com/embed/faoMzvAZB6M?si=eF8Tzh2JInhIl1tB&autoplay=1" },
+  { name: "NHT II", url: "https://www.youtube.com/embed/veGvT1BVlBY?si=VnvJlXNKUKylthHh&autoplay=1" },
+  { name: "Dirty", url: "https://www.youtube.com/embed/IJf6jcr-LIU?si=ewenrBzDBdfUkJts&autoplay=1" },
+  { name: "Been on the grind", url: "https://www.youtube.com/embed/_HcR_an32rI?si=bSGim6N6BzDdWBvH&autoplay=1" },
+  { name: "Beast Mode", url: "https://www.youtube.com/embed/BUFg2__bmV4?si=eFa312pdMnjjmNT0&autoplay=1" },
+  { name: "Don't drink the water", url: "https://www.youtube.com/embed/xhDbHPJgAY4?si=ikr2HU_hDcldp6Zo&autoplay=1" },
+  { name: "They returned", url: "https://www.youtube.com/embed/CFzhl2LIvzU?si=JoUWmcQpp-j5sU9y&autoplay=1" },
+  { name: "Zombie Battles", url: "https://www.youtube.com/embed/76vSFizdJOY?si=1fIpUlWRxcfRTGup&autoplay=1" },
+  { name: "Mikey's potato", url: "https://www.youtube.com/embed/jYErx5PGvew?si=_u1yjM-kN16UQIBo&autoplay=1" },
+  { name: "Dead music", url: "https://www.youtube.com/embed/f9FdfLSquI8?si=p5RIU7CzM1tml0OJ&autoplay=1" },
+  { name: "Zombie Ballroom", url: "https://www.youtube.com/embed/Br-q6TjYBh0?si=CgHSSduBKDALJONe&autoplay=1" },
+  { name: "Watch Out", url: "https://www.youtube.com/embed/6PXqsCfPbBg?si=5oy0QxZDmxDwRQ4q&autoplay=1" },
+  { name: "Orange Pill", url: "https://www.youtube.com/embed/09lm7FeGPVM?si=pOr_x02p_C0RC_5D&autoplay=1" },
+  { name: "Jokerville", url: "https://www.youtube.com/embed/HQX4TLDugjg?si=wDPDYl--fWj3GAUu&autoplay=1" },
+  { name: "Umbrella", url: "https://www.youtube.com/embed/AwGcHFVUakc?si=6q2w3rTlLN5ew1on&autoplay=1" },
+  { name: "Uzi Sh!t", url: "https://www.youtube.com/embed/v_RyfmZUhqw?si=Mu7hwtVp9Z6h7KmH&autoplay=1" },
+  { name: "What's the NextHustle?", url: "https://www.youtube.com/embed/MeAbzAIejOk?si=IGcNN551f1L_0eD2&autoplay=1" },
+  { name: "I don't accept BITCOIN!!!", url: "https://www.youtube.com/embed/AtJTH-eOH_k?si=GbCz8KP2PEoLzpbf&autoplay=1" },
+  { name: "Blockchain", url: "https://www.youtube.com/embed/EH-9O2VgRwY?si=BHHcXKTxg23azz4B&autoplay=1" },
+  { name: "The BlackFCryptoFAce", url: "https://www.youtube.com/embed/jJS-4Hi6hT8?si=OkgNrD_DsA6yuC9d&autoplay=1" }
+];
+
+let currentChannel = 0;
+let isPoweredOn = false;
+let volume = 50;
+let isMovementEnabled = true;
+
+function changeChannel(direction) {
+  if (!isPoweredOn) return;
+  currentChannel = (currentChannel + direction + channels.length) % channels.length;
+  iframe.src = channels[currentChannel].url;
+  showStatic();
+  displayChannelInfo();
+}
+
+function displayChannelInfo() {
+  channelDisplay.textContent = `Channel ${currentChannel + 1}: ${channels[currentChannel].name}`;
+  channelDisplay.style.opacity = '1';
+  setTimeout(() => {
+    channelDisplay.style.opacity = '0';
+  }, 3000);
+}
+
+function showStatic() {
+  staticOverlay.style.opacity = '0.3';
+  setTimeout(() => {
+    staticOverlay.style.opacity = '0';
+  }, 500);
+}
+
+function handleMouseMove(event) {
+  if (!isMovementEnabled) return;
+  
+  const x = (window.innerWidth / 2 - event.clientX) / 30;
+  const y = (window.innerHeight / 2 - event.clientY) / 30;
+
+  tv.style.transform = `rotateX(${15 - y}deg) rotateY(${x - 15}deg)`;
+}
+
+document.addEventListener('mousemove', handleMouseMove);
+
+movementToggle.addEventListener('change', (event) => {
+  isMovementEnabled = event.target.checked;
+  if (!isMovementEnabled) {
+    tv.style.transform = 'rotateX(15deg) rotateY(-15deg)';
+  }
+});
+
+function togglePower() {
+  isPoweredOn = !isPoweredOn;
+  tv.classList.toggle('off');
+  powerIndicator.style.backgroundColor = isPoweredOn ? '#2ecc71' : '#e74c3c';
+  powerIndicator.style.boxShadow = isPoweredOn ? '0 0 15px #2ecc71' : '0 0 15px #e74c3c';
+  if (isPoweredOn) {
+    iframe.src = channels[currentChannel].url;
+    showStatic();
+    displayChannelInfo();
+  } else {
+    iframe.src = '';
+    channelDisplay.style.opacity = '0';
+  }
+}
+
+function updateVolume(change) {
+  if (!isPoweredOn) return;
+  volume = Math.max(0, Math.min(100, volume + change));
+  volumeLevel.style.height = `${volume}%`;
+  iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[' + volume + ']}', '*');
+}
+
+// TV buttons
+document.getElementById('power').addEventListener('click', togglePower);
+document.getElementById('volume-up').addEventListener('click', () => updateVolume(10));
+document.getElementById('volume-down').addEventListener('click', () => updateVolume(-10));
+document.getElementById('channel-up').addEventListener('click', () => changeChannel(1));
+document.getElementById('channel-down').addEventListener('click', () => changeChannel(-1));
+
+// Remote buttons
+document.getElementById('remote-power').addEventListener('click', togglePower);
+document.getElementById('remote-vol-up').addEventListener('click', () => updateVolume(10));
+document.getElementById('remote-vol-down').addEventListener('click', () => updateVolume(-10));
+document.getElementById('remote-ch-up').addEventListener('click', () => changeChannel(1));
+document.getElementById('remote-ch-down').addEventListener('click', () => changeChannel(-1));
+
+// Sound effects
+function playSound(frequency, duration) {
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  
+  oscillator.type = 'sine';
+  oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+  
+  gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  
+  oscillator.start();
+  oscillator.stop(audioContext.currentTime + duration);
+}
+
+function buttonClickSound() {
+  playSound(800, 0.1);
+}
+
+function powerSound() {
+  playSound(isPoweredOn ? 1000 : 500, 0.2);
+}
+
+function channelChangeSound() {
+  if (!isPoweredOn) return;
+  playSound(1200, 0.1);
+}
+
+// Add sound effects to buttons
+document.querySelectorAll('.button, .remote button').forEach(btn => {
+  btn.addEventListener('click', buttonClickSound);
+});
+
+document.getElementById('power').addEventListener('click', powerSound);
+document.getElementById('remote-power').addEventListener('click', powerSound);
+
+[
+  document.getElementById('channel-up'),
+  document.getElementById('channel-down'),
+  document.getElementById('remote-ch-up'),
+  document.getElementById('remote-ch-down')
+].forEach(btn => {
+  btn.addEventListener('click', channelChangeSound);
+});
+
+// Initialize
+volumeLevel.style.height = `${volume}%`;
+
+// Resize event for Matrix background
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+</script>
+</body></html>
